@@ -6,41 +6,46 @@
       </h1>
       <section class="content">
         <div class="select">
-          <p class="select__title">Ваш филиал*</p>
+          <h4 class="select__title">Ваш филиал*</h4>
           <select
             class="select__list"
-            v-model="selected"
-            :disabled="cheked"
+            v-model="form.value"
+            :disabled="!!form.checked"
             required
           >
             <option disabled value="">Выберите город</option>
             <option
-              v-for="city in cities"
+              v-for="city in form.cities"
               :key="city.id"
-              v-bind:value="cities.title"
+              v-bind:value="form.cities.title"
             >
               {{ city.title }}
             </option>
           </select>
-          <input
-            class="select__checkbox"
-            type="checkbox"
-            id="checkbox"
-            v-model="checked"
-          />
-          <label for="checkbox">{{}}</label>
+          <div class="select__checkbox-wrapper">
+            <input
+              class="select__checkbox"
+              type="checkbox"
+              id="checkbox"
+              v-model="form.checked"
+            />
+            <label for="checkbox">{{}}</label>
+            <p class="select__online">Онлайн</p>
+          </div>
         </div>
         <div class="request-subject">
-          <p class="request-subject__title">Тема обращения*</p>
+          <h4 class="request-subject__title">Тема обращения*</h4>
           <div class="request-subject__wraper-input">
             <input
               class="request-subject__input-radio"
               type="radio"
               id="one"
               value="Один"
-              v-model="picked"
+              @change="form.shortmessage = null"
+              v-model="form.picked"
+              required
             />
-            <label for="one">Недоволен качеством услуг</label>
+            <label for="one" required>Недоволен качеством услуг</label>
           </div>
           <div class="request-subject__wraper-input">
             <input
@@ -48,7 +53,9 @@
               type="radio"
               id="two"
               value="Два"
-              v-model="picked"
+              @change="form.shortmessage = null"
+              v-model="form.picked"
+              required
             />
             <label for="two">Расторжение договора</label>
           </div>
@@ -58,7 +65,8 @@
               type="radio"
               id="three"
               value="три"
-              v-model="picked"
+              @change="form.shortmessage = null"
+              v-model="form.picked"
             />
             <label for="three">Не приходит письмо активации на почту</label>
           </div>
@@ -68,40 +76,37 @@
               type="radio"
               id="four"
               value="четыре"
-              v-model="picked"
+              @change="form.shortmessage = null"
+              v-model="form.picked"
             />
             <label for="four">Не работает личный кабинет</label>
           </div>
           <input
             class="request-subject_other-request"
-            v-model="shortmessage"
+            v-model.lazy="form.shortmessage"
             type="text"
+            @input="clearRadio"
             placeholder="другое"
           />
         </div>
         <div class="description-problem">
-          <p class="description-problem__title">Описание проблемы*</p>
+          <h4 class="description-problem__title">Описание проблемы*</h4>
           <textarea
             class="description-problem__textarea"
-            v-model="longmessage"
+            v-model.lazy="form.longmessage"
             placeholder="введите несколько строчек"
             required
           ></textarea>
         </div>
         <div class="download-documents">
-          <p class="download-documents__title">Загрузка документов</p>
-          <p class="clas">
+          <h4 class="download-documents__title">Загрузка документов</h4>
+          <p class="download-documents__message-info">
             Приложите,пожалуйста, полноценный скриншот. Это поможет быстрее
             решить проблему
           </p>
-          <input
-            type="file"
-            id="file"
-            ref="file"
-            v-on:change="handleFileUpload()"
-          />
+          <input type="file" id="file" ref="file" />
         </div>
-        <button class="buttonSubmit" @click="createPost">ОТПРАВИТЬ</button>
+        <button class="buttonSubmit" @click="sendMessage">ОТПРАВИТЬ</button>
       </section>
     </div>
   </form>
@@ -109,26 +114,55 @@
 
 <script>
 import axios from "axios";
+// import FileInput from "vue-simple-file-input";
 export default {
+  // components: {
+  //   FileInput,
+  // },
   data() {
     return {
-      selected: {},
-      cities: [],
-      checked: false,
-      picked: false,
-      shortmessage: "",
-      longmessage: "",
+      form: {
+        value: '',
+        cities: [],
+        checked: false,
+        picked: false,
+        shortmessage: "",
+        longmessage: "",
+        file: null,
+      },
     };
   },
-  mounted() {
+  created() {
     axios
       .get("https://624d935653326d0cfe4f0ab4.mockapi.io/api/v1/cities")
       .then((res) => {
         console.log(res);
-        this.cities = res.data;
-        console.log(res.data);
-        console.log(this.cities);
-      });
+        this.form.cities = res.data;
+      })
+      .catch((error) => console.log(error));
+  },
+
+  methods: {
+    // clearText() {
+    //   this.form.checked = "";
+    // },
+    clearRadio() {
+      console.log("clearRadio");
+      this.form.picked = null;
+    },
+    sendMessage() {
+      axios
+        .post("https://624d935653326d0cfe4f0ab4.mockapi.io/api/v1/send-form", {})
+        .then((res) => {console.log(res)})
+        .catch((error) => console.log(error));
+      this.form.value = null;
+      this.form.cities = null;
+      this.form.checked = false;
+      this.form.picked = false;
+      this.form.shortmessage = null;
+      this.form.longmessage = null;
+      this.form.file = null;
+    },
   },
 };
 </script>
@@ -136,18 +170,20 @@ export default {
 
 <style scoped>
 .conteiner {
+  margin-top: 20px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
 }
 .content {
+  margin-top: 15px;
   display: flex;
   flex-direction: column;
   max-width: 700px;
   width: 100%;
   border: 2px solid grey;
-  min-height: 750px;
+  min-height: 800px;
 }
 .content__title {
   font-size: 16px;
@@ -163,16 +199,30 @@ export default {
 .select__title {
   margin-bottom: 10px;
 }
+.select__online {
+  margin-left: 15px;
+  align-self: center;
+}
 .select__list {
   padding: 5px;
   max-width: 250px;
   width: 100%;
 }
+.select__checkbox-wrapper {
+  margin-top: 20px;
+  display: flex;
+  max-width: 250px;
+  width: 100%;
+  justify-content: start;
+  align-items: center;
+}
 .select__checkbox {
-  margin-top: 10px;
   min-height: 30px;
   max-width: 30px;
   width: 100%;
+}
+.form {
+  position: relative;
 }
 .request-subject {
   display: flex;
@@ -202,6 +252,10 @@ export default {
   max-width: 250px;
   width: 100%;
 }
+
+.description-problem__title {
+  margin-bottom: 10px;
+}
 .description-problem {
   display: flex;
   flex-direction: column;
@@ -215,21 +269,30 @@ export default {
   width: 100%;
   height: 100px;
 }
+.download-documents__title {
+  margin-bottom: 10px;
+}
 .download-documents {
   display: flex;
   flex-direction: column;
   justify-content: start;
   align-items: flex-start;
   margin: 30px 0 0 25px;
+  max-width: 400px;
+}
+.download-documents__message-info {
+  text-align: left;
+  margin-bottom: 20px;
 }
 
 .buttonSubmit {
   padding: 10px;
-  max-width: 150px;
+  max-width: 100px;
   width: 100%;
   color: aliceblue;
-  background: grey;
+  background: rgb(228, 112, 34);
   border: none;
   margin: 30px 0 0 25px;
+  cursor: pointer;
 }
 </style>

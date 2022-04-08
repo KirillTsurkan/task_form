@@ -1,6 +1,7 @@
 <template>
   <div class="modal" v-if="show === true" @click="hideModal">
     <div @click.stop class="modal__content">
+      <p>Заявка отправлена</p>
       <button class="button__close" @click="hideModal"></button>
       <slot></slot>
     </div>

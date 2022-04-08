@@ -1,5 +1,9 @@
 <template>
-  <form class="form" @submit.prevent="sendMessage">
+  <form
+    enctype="multipart/form-data"
+    class="form"
+    @submit.prevent="sendMessage"
+  >
     <div class="conteiner">
       <h1 class="content__title">
         Форма подачи заявки в отдел сервиса и качества
@@ -104,16 +108,11 @@
             Приложите,пожалуйста, полноценный скриншот. Это поможет быстрее
             решить проблему
           </p>
-          <input
-            @change="handleFileUpload($event)"
-            type="file"
-            id="file"
-            ref="file"
-          />
+          <input type="file" @change="selectFile($event)" ref="file" />
         </div>
         <button
           v-bind:class="{ active: isActive }"
-          :disabled="(!!form.value) && (!!form.shortmessage)"
+          :disabled="!!form.value && !!form.shortmessage"
           class="buttonSubmit"
         >
           ОТПРАВИТЬ
@@ -128,7 +127,6 @@
 <script>
 import Modal from "@/components/Modal";
 import axios from "axios";
-// import FileInput from "vue-simple-file-input";
 export default {
   components: {
     Modal,
@@ -164,58 +162,38 @@ export default {
   },
 
   methods: {
+    selectFile(event) {
+      this.file = event.target.files[0];
+    },
+
     showModal() {
       this.modalVisible = true;
     },
-    // submitFile() {
-    //   let formData = new FormData();
-    //   formData.append("file", this.file);
-    //   axios
-    //     .post(
-    //       "https://624d935653326d0cfe4f0ab4.mockapi.io/api/v1/send-form",
-    //       formData,
-    //       {
-    //         headers: {
-    //           "Content-Type": "multipart/form-data",
-    //         },
-    //       }
-    //     )
-    //     .then(function () {
-    //       console.log("SUCCESS!!");
-    //       showModal();
-    //     })
-    //     .catch(function () {
-    //       console.log("FAILURE!!");
-    //     });
-    // },
-    // handleFileUpload(event) {
-    //   this.file = event.target.files[0];
-    // },
     clearRadio() {
       console.log("clearRadio");
       this.form.picked = null;
     },
     sendMessage() {
       axios
-        .post(
-          "https://624d935653326d0cfe4f0ab4.mockapi.io/api/v1/send-form",
-          {form: this.form}
-        )
+        .post("https://624d935653326d0cfe4f0ab4.mockapi.io/api/v1/send-form", {
+          form: this.form,
+        })
         .then((res) => {
-          if (res.status > 200) {
+          if (res.data.success === true) {
+            this.form.value = null;
+            this.form.cities = null;
+            this.form.checked = false;
+            this.form.picked = false;
+            this.form.shortmessage = null;
+            this.form.longmessage = null;
+            this.file = null;
             this.showModal();
+          } else {
+            alert("Ошибка отправка заявки");
           }
           console.log(res);
         })
         .catch((error) => console.log(error));
-
-      this.form.value = null;
-      this.form.cities = null;
-      this.form.checked = false;
-      this.form.picked = false;
-      this.form.shortmessage = null;
-      this.form.longmessage = null;
-      this.file = null;
     },
   },
 };

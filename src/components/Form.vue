@@ -1,5 +1,5 @@
 <template>
-  <form class="form" @submit.prevent="">
+  <form class="form" @submit.prevent="sendMessage">
     <div class="conteiner">
       <h1 class="content__title">
         Форма подачи заявки в отдел сервиса и качества
@@ -104,47 +104,92 @@
             Приложите,пожалуйста, полноценный скриншот. Это поможет быстрее
             решить проблему
           </p>
-          <input type="file" id="file" ref="file" />
+          <input
+            @change="handleFileUpload($event)"
+            type="file"
+            id="file"
+            ref="file"
+          />
         </div>
-        <button class="buttonSubmit" @click="sendMessage">ОТПРАВИТЬ</button>
+        <button
+          v-bind:class="{ active: isActive }"
+          :disabled="!form.checked && !form.picked"
+          class="buttonSubmit"
+        >
+          ОТПРАВИТЬ
+        </button>
+        <button @click="showModal">Modal</button>
       </section>
     </div>
   </form>
+  <modal v-model:show="modalVisible"> </modal>
 </template>
 
 <script>
+import Modal from "@/components/Modal";
 import axios from "axios";
 // import FileInput from "vue-simple-file-input";
 export default {
-  // components: {
-  //   FileInput,
-  // },
+  components: {
+    Modal,
+  },
   data() {
     return {
       form: {
-        value: '',
-        cities: [],
+        value: "",
+        cities: {},
         checked: false,
         picked: false,
         shortmessage: "",
         longmessage: "",
-        file: null,
       },
+      file: "",
+      isActive: true,
+      modalVisible: false,
     };
   },
   created() {
     axios
       .get("https://624d935653326d0cfe4f0ab4.mockapi.io/api/v1/cities")
       .then((res) => {
-        console.log(res);
+        console.log(res.status);
+        // if (res.status === 200) {
+        //   console.log("200 power!!");
+        // }
         this.form.cities = res.data;
+        // console.log(this.form.cities);
+        // console.log(Object.values(this.form.cities));
       })
       .catch((error) => console.log(error));
   },
 
   methods: {
-    // clearText() {
-    //   this.form.checked = "";
+    showModal() {
+      this.modalVisible = true;
+    },
+    // submitFile() {
+    //   let formData = new FormData();
+    //   formData.append("file", this.file);
+    //   axios
+    //     .post(
+    //       "https://624d935653326d0cfe4f0ab4.mockapi.io/api/v1/send-form",
+    //       formData,
+    //       {
+    //         headers: {
+    //           "Content-Type": "multipart/form-data",
+    //         },
+    //       }
+    //     )
+    //     .then(function () {
+    //       console.log("SUCCESS!!");
+    //       showModal();
+    //     })
+    //     .catch(function () {
+    //       console.log("FAILURE!!");
+    //     });
+    // },
+    // handleFileUpload(event) {
+    //   this.file = event.target.files[0];
     // },
     clearRadio() {
       console.log("clearRadio");
@@ -152,16 +197,25 @@ export default {
     },
     sendMessage() {
       axios
-        .post("https://624d935653326d0cfe4f0ab4.mockapi.io/api/v1/send-form", {})
-        .then((res) => {console.log(res)})
+        .post(
+          "https://624d935653326d0cfe4f0ab4.mockapi.io/api/v1/send-form",
+          {}
+        )
+        .then((res) => {
+          if (res.status > 200) {
+            this.showModal();
+          }
+          console.log(res);
+        })
         .catch((error) => console.log(error));
+
       this.form.value = null;
       this.form.cities = null;
       this.form.checked = false;
       this.form.picked = false;
       this.form.shortmessage = null;
       this.form.longmessage = null;
-      this.form.file = null;
+      this.file = null;
     },
   },
 };
@@ -290,9 +344,12 @@ export default {
   max-width: 100px;
   width: 100%;
   color: aliceblue;
-  background: rgb(228, 112, 34);
+  background: rgb(112, 105, 99);
   border: none;
   margin: 30px 0 0 25px;
   cursor: pointer;
+}
+.active {
+  background: rgb(228, 112, 34);
 }
 </style>

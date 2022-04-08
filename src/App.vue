@@ -1,18 +1,29 @@
 <template>
   <Form />
+  <!-- <button @click="showModal">Modal</button> -->
+  <!-- <modal v-model:show="modalVisible"> </modal> -->
 </template>
 
 <script>
+import axios from "axios";
 import Form from "@/components/Form";
+// import Modal from "@/components/Modal";
 
 export default {
   components: {
     Form,
+    // Modal,
   },
   data() {
-    return {};
+    return {
+      // modalVisible: false,
+    };
   },
-  methods: {},
+  methods: {
+    // showModal() {
+    //   this.modalVisible = true;
+    // },
+  },
 };
 </script>
 

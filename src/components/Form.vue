@@ -113,12 +113,12 @@
         </div>
         <button
           v-bind:class="{ active: isActive }"
-          :disabled="!form.checked && !form.picked"
+          :disabled="(!!form.value) && (!!form.shortmessage)"
           class="buttonSubmit"
         >
           ОТПРАВИТЬ
         </button>
-        <button @click="showModal">Modal</button>
+        <!-- <button @click="showModal">Modal</button> -->
       </section>
     </div>
   </form>
@@ -157,8 +157,8 @@ export default {
         //   console.log("200 power!!");
         // }
         this.form.cities = res.data;
-        // console.log(this.form.cities);
-        // console.log(Object.values(this.form.cities));
+        console.log(this.form.cities);
+        console.log(Object.values(this.form.cities));
       })
       .catch((error) => console.log(error));
   },
@@ -199,7 +199,7 @@ export default {
       axios
         .post(
           "https://624d935653326d0cfe4f0ab4.mockapi.io/api/v1/send-form",
-          {}
+          {form: this.form}
         )
         .then((res) => {
           if (res.status > 200) {

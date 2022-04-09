@@ -7,23 +7,15 @@
 <script>
 import axios from "axios";
 import Form from "@/components/Form";
-// import Modal from "@/components/Modal";
 
 export default {
   components: {
     Form,
-    // Modal,
   },
   data() {
-    return {
-      // modalVisible: false,
-    };
+    return {};
   },
-  methods: {
-    // showModal() {
-    //   this.modalVisible = true;
-    // },
-  },
+  methods: {},
 };
 </script>
 

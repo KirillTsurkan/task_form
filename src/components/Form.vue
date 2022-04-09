@@ -21,7 +21,7 @@
             <option
               v-for="city in form.cities"
               :key="city.id"
-              v-bind:value="form.cities.title"
+              v-bind:value="city.title"
             >
               {{ city.title }}
             </option>
@@ -31,6 +31,7 @@
               class="select__checkbox"
               type="checkbox"
               id="checkbox"
+              @change="clearCity"
               v-model="form.checked"
             />
             <label for="checkbox">{{}}</label>
@@ -87,7 +88,7 @@
           </div>
           <input
             class="request-subject_other-request"
-            v-model.lazy="form.shortmessage"
+            v-model="form.shortmessage"
             type="text"
             @input="clearRadio"
             placeholder="другое"
@@ -97,7 +98,7 @@
           <h4 class="description-problem__title">Описание проблемы*</h4>
           <textarea
             class="description-problem__textarea"
-            v-model.lazy="form.longmessage"
+            v-model="form.longmessage"
             placeholder="введите несколько строчек"
             required
           ></textarea>
@@ -111,13 +112,14 @@
           <input type="file" @change="selectFile($event)" ref="file" />
         </div>
         <button
-          v-bind:class="{ active: isActive }"
-          :disabled="!!form.value && !!form.shortmessage"
+          :disabled="isButtonDisabled"
+          :class="{
+            disabled: isButtonDisabled,
+          }"
           class="buttonSubmit"
         >
           ОТПРАВИТЬ
         </button>
-        <!-- <button @click="showModal">Modal</button> -->
       </section>
     </div>
   </form>
@@ -135,7 +137,7 @@ export default {
     return {
       form: {
         value: "",
-        cities: {},
+        cities: "",
         checked: false,
         picked: false,
         shortmessage: "",
@@ -146,47 +148,54 @@ export default {
       modalVisible: false,
     };
   },
+
   created() {
     axios
       .get("https://624d935653326d0cfe4f0ab4.mockapi.io/api/v1/cities")
       .then((res) => {
-        console.log(res.status);
-        // if (res.status === 200) {
-        //   console.log("200 power!!");
-        // }
         this.form.cities = res.data;
-        console.log(this.form.cities);
-        console.log(Object.values(this.form.cities));
       })
       .catch((error) => console.log(error));
   },
-
   methods: {
     selectFile(event) {
       this.file = event.target.files[0];
     },
-
     showModal() {
       this.modalVisible = true;
     },
     clearRadio() {
-      console.log("clearRadio");
       this.form.picked = null;
     },
+    clearCity() {
+      this.form.value = null;
+    },
     sendMessage() {
+      console.log("iii");
+      const formData = new FormData();
+      formData.append("file", this.file);
+      formData.append("data", this.form);
+
+      // formData.append("data", this.form);
       axios
-        .post("https://624d935653326d0cfe4f0ab4.mockapi.io/api/v1/send-form", {
-          form: this.form,
-        })
+        .post(
+          "https://624d935653326d0cfe4f0ab4.mockapi.io/api/v1/send-form",
+          this.form,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+            body: formData,
+          }
+        )
         .then((res) => {
           if (res.data.success === true) {
             this.form.value = null;
-            this.form.cities = null;
             this.form.checked = false;
             this.form.picked = false;
             this.form.shortmessage = null;
             this.form.longmessage = null;
-            this.file = null;
             this.showModal();
           } else {
             alert("Ошибка отправка заявки");
@@ -194,6 +203,12 @@ export default {
           console.log(res);
         })
         .catch((error) => console.log(error));
+    },
+  },
+  computed: {
+    isButtonDisabled() {
+      const { value, checked, picked, shortmessage, longmessage } = this.form;
+      return (!value && !checked) || (!picked && !shortmessage) || !longmessage;
     },
   },
 };
@@ -322,12 +337,19 @@ export default {
   max-width: 100px;
   width: 100%;
   color: aliceblue;
-  background: rgb(112, 105, 99);
+  background: rgb(228, 112, 34);
   border: none;
   margin: 30px 0 0 25px;
   cursor: pointer;
 }
-.active {
-  background: rgb(228, 112, 34);
+.disabled {
+  padding: 10px;
+  max-width: 100px;
+  width: 100%;
+  color: aliceblue;
+  border: none;
+  margin: 30px 0 0 25px;
+  cursor: pointer;
+  background: rgb(67, 65, 63);
 }
 </style>

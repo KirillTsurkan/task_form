@@ -137,7 +137,6 @@ export default {
     return {
       form: {
         value: "",
-        cities: "",
         checked: false,
         picked: false,
         shortmessage: "",
@@ -146,6 +145,7 @@ export default {
       file: "",
       isActive: true,
       modalVisible: false,
+      cities: "",
     };
   },
 

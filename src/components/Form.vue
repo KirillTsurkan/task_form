@@ -137,19 +137,20 @@ export default {
     return {
       form: {
         value: "",
-        cities: "",
         checked: false,
         picked: false,
         shortmessage: "",
         longmessage: "",
       },
-      file: "",
+      file: null,
+      cities: "",
+
       isActive: true,
       modalVisible: false,
     };
   },
 
-  created() {
+  mounted() {
     axios
       .get("https://624d935653326d0cfe4f0ab4.mockapi.io/api/v1/cities")
       .then((res) => {
@@ -173,21 +174,13 @@ export default {
     sendMessage() {
       console.log("iii");
       const formData = new FormData();
-      formData.append("file", this.file);
-      formData.append("data", this.form);
+      formData.append("file", blob, this.file);
 
       // formData.append("data", this.form);
       axios
         .post(
           "https://624d935653326d0cfe4f0ab4.mockapi.io/api/v1/send-form",
-          this.form,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-            body: formData,
-          }
+          formData
         )
         .then((res) => {
           if (res.data.success === true) {
@@ -200,7 +193,6 @@ export default {
           } else {
             alert("Ошибка отправка заявки");
           }
-          console.log(res);
         })
         .catch((error) => console.log(error));
     },

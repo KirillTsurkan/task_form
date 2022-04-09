@@ -1,11 +1,8 @@
 <template>
   <Form />
-  <!-- <button @click="showModal">Modal</button> -->
-  <!-- <modal v-model:show="modalVisible"> </modal> -->
 </template>
 
 <script>
-import axios from "axios";
 import Form from "@/components/Form";
 
 export default {

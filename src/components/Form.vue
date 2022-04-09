@@ -1,16 +1,18 @@
 <template>
-  <form
-    enctype="multipart/form-data"
-    class="form"
-    @submit.prevent="sendMessage"
-  >
-    <div class="conteiner">
+  <div class="container">
+    <form
+      enctype="multipart/form-data"
+      class="form"
+      @submit.prevent="sendMessage"
+    >
       <h1 class="content__title">
         Форма подачи заявки в отдел сервиса и качества
       </h1>
       <section class="content">
         <div class="select">
-          <h4 class="select__title">Ваш филиал*</h4>
+          <h4 class="select__title">
+            Ваш филиал<span class="required-mark">*</span>
+          </h4>
           <select
             class="select__list"
             v-model="form.value"
@@ -19,7 +21,7 @@
           >
             <option disabled value="">Выберите город</option>
             <option
-              v-for="city in form.cities"
+              v-for="city in cities"
               :key="city.id"
               v-bind:value="city.title"
             >
@@ -39,7 +41,9 @@
           </div>
         </div>
         <div class="request-subject">
-          <h4 class="request-subject__title">Тема обращения*</h4>
+          <h4 class="request-subject__title">
+            Тема обращения<span class="required-mark">*</span>
+          </h4>
           <div class="request-subject__wraper-input">
             <input
               class="request-subject__input-radio"
@@ -95,11 +99,13 @@
           />
         </div>
         <div class="description-problem">
-          <h4 class="description-problem__title">Описание проблемы*</h4>
+          <h4 class="description-problem__title">
+            Описание проблемы<span class="required-mark">*</span>
+          </h4>
           <textarea
             class="description-problem__textarea"
             v-model="form.longmessage"
-            placeholder="введите несколько строчек"
+            placeholder="опишите свою проблему"
             required
           ></textarea>
         </div>
@@ -121,8 +127,9 @@
           ОТПРАВИТЬ
         </button>
       </section>
-    </div>
-  </form>
+    </form>
+  </div>
+
   <modal v-model:show="modalVisible"> </modal>
 </template>
 
@@ -144,7 +151,6 @@ export default {
       },
       file: null,
       cities: "",
-
       isActive: true,
       modalVisible: false,
     };
@@ -154,7 +160,7 @@ export default {
     axios
       .get("https://624d935653326d0cfe4f0ab4.mockapi.io/api/v1/cities")
       .then((res) => {
-        this.form.cities = res.data;
+        this.cities = res.data;
       })
       .catch((error) => console.log(error));
   },
@@ -171,25 +177,28 @@ export default {
     clearCity() {
       this.form.value = null;
     },
-    sendMessage() {
-      console.log("iii");
-      const formData = new FormData();
-      formData.append("file", blob, this.file);
 
-      // formData.append("data", this.form);
+    sendMessage() {
+      console.log("GO");
+      const formData = new FormData();
+      formData.append("file", this.file);
+      formData.set("data", this.form);
+      console.log(formData);
       axios
         .post(
           "https://624d935653326d0cfe4f0ab4.mockapi.io/api/v1/send-form",
-          formData
+          formData,
+          { "Content-Type": "multipart/form-data" }
         )
         .then((res) => {
+          console.log(res.data);
           if (res.data.success === true) {
             this.form.value = null;
             this.form.checked = false;
             this.form.picked = false;
             this.form.shortmessage = null;
             this.form.longmessage = null;
-            this.showModal();
+            (this.file = null), this.showModal();
           } else {
             alert("Ошибка отправка заявки");
           }
@@ -208,12 +217,8 @@ export default {
 
 
 <style scoped>
-.conteiner {
-  margin-top: 20px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+.container {
+  position: relative;
 }
 .content {
   margin-top: 15px;
@@ -225,7 +230,7 @@ export default {
   min-height: 800px;
 }
 .content__title {
-  font-size: 16px;
+  font-size: 20px;
   align-self: center;
 }
 .select {
@@ -261,7 +266,11 @@ export default {
   width: 100%;
 }
 .form {
-  position: relative;
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 .request-subject {
   display: flex;
@@ -287,6 +296,7 @@ export default {
 }
 
 .request-subject_other-request {
+  font-size: 18px;
   padding: 5px;
   max-width: 250px;
   width: 100%;
@@ -304,6 +314,7 @@ export default {
 }
 
 .description-problem__textarea {
+  font-size: 20px;
   max-width: 650px;
   width: 100%;
   height: 100px;
@@ -343,5 +354,8 @@ export default {
   margin: 30px 0 0 25px;
   cursor: pointer;
   background: rgb(67, 65, 63);
+}
+.required-mark {
+  color: red;
 }
 </style>

@@ -1,6 +1,7 @@
 <template>
   <div class="container">
     <form
+      ref="forma"
       enctype="multipart/form-data"
       class="form"
       @submit.prevent="sendMessage"
@@ -10,12 +11,12 @@
       </h1>
       <section class="content">
         <div class="select">
-          <h4 class="select__title">
+          <h4 class="select__title title">
             Ваш филиал<span class="required-mark">*</span>
           </h4>
           <select
             class="select__list"
-            v-model="form.value"
+            v-model="form.selected"
             :disabled="!!form.checked"
             required
           >
@@ -41,7 +42,7 @@
           </div>
         </div>
         <div class="request-subject">
-          <h4 class="request-subject__title">
+          <h4 class="request-subject__title title">
             Тема обращения<span class="required-mark">*</span>
           </h4>
           <div class="request-subject__wraper-input">
@@ -99,7 +100,7 @@
           />
         </div>
         <div class="description-problem">
-          <h4 class="description-problem__title">
+          <h4 class="description-problem__title title">
             Описание проблемы<span class="required-mark">*</span>
           </h4>
           <textarea
@@ -110,7 +111,7 @@
           ></textarea>
         </div>
         <div class="download-documents">
-          <h4 class="download-documents__title">Загрузка документов</h4>
+          <h4 class="download-documents__title title">Загрузка документов</h4>
           <p class="download-documents__message-info">
             Приложите,пожалуйста, полноценный скриншот. Это поможет быстрее
             решить проблему
@@ -143,7 +144,7 @@ export default {
   data() {
     return {
       form: {
-        value: "",
+        selected: "",
         checked: false,
         picked: false,
         shortmessage: "",
@@ -155,7 +156,7 @@ export default {
       modalVisible: false,
     };
   },
-
+  //жизненный цикл (получаем запрос с сервера)
   mounted() {
     axios
       .get("https://624d935653326d0cfe4f0ab4.mockapi.io/api/v1/cities")
@@ -175,50 +176,60 @@ export default {
       this.form.picked = null;
     },
     clearCity() {
-      this.form.value = null;
+      this.form.selected = null;
     },
-
+    resetForm() {
+      this.$refs.file.value = "";
+      this.file = null;
+      this.form.checked = false;
+      this.form.picked = false;
+      this.form.shortmessage = null;
+      this.form.longmessage = null;
+      this.form.selected = null;
+    },
+    //функция отправки запроса
     sendMessage() {
-      console.log("GO");
       const formData = new FormData();
       formData.append("file", this.file);
       formData.set("data", this.form);
-      console.log(formData);
       axios
         .post(
-          "https://624d935653326d0cfe4f0ab4.mockapi.io/api/v1/send-form",
+          "https://624d935653326d0cfe4f0ab4.mockapi.io/api/v1/send-form", // если без файла, то можно  использовать this.form
           formData,
           { "Content-Type": "multipart/form-data" }
         )
         .then((res) => {
           console.log(res.data);
           if (res.data.success === true) {
-            this.form.value = null;
-            this.form.checked = false;
-            this.form.picked = false;
-            this.form.shortmessage = null;
-            this.form.longmessage = null;
-            (this.file = null), this.showModal();
+            this.resetForm();
+            this.showModal();
           } else {
             alert("Ошибка отправка заявки");
           }
         })
         .catch((error) => console.log(error));
+      this.resetForm();
     },
   },
   computed: {
     isButtonDisabled() {
-      const { value, checked, picked, shortmessage, longmessage } = this.form;
-      return (!value && !checked) || (!picked && !shortmessage) || !longmessage;
+      const { selected, checked, picked, shortmessage, longmessage } =
+        this.form;
+      return (
+        (!selected && !checked) || (!picked && !shortmessage) || !longmessage
+      );
     },
   },
 };
 </script>
 
-
+//стилизация
 <style scoped>
 .container {
   position: relative;
+}
+.title {
+  margin-bottom: 10px;
 }
 .content {
   margin-top: 15px;
@@ -240,9 +251,7 @@ export default {
   align-items: flex-start;
   margin: 30px 0 0 25px;
 }
-.select__title {
-  margin-bottom: 10px;
-}
+
 .select__online {
   margin-left: 15px;
   align-self: center;
@@ -279,9 +288,7 @@ export default {
   align-items: flex-start;
   margin: 30px 0 0 25px;
 }
-.request-subject__title {
-  margin-bottom: 10px;
-}
+
 .request-subject__input-radio {
   min-height: 30px;
   max-width: 30px;
@@ -296,15 +303,12 @@ export default {
 }
 
 .request-subject_other-request {
-  font-size: 18px;
+  font-size: 16px;
   padding: 5px;
   max-width: 250px;
   width: 100%;
 }
 
-.description-problem__title {
-  margin-bottom: 10px;
-}
 .description-problem {
   display: flex;
   flex-direction: column;
@@ -314,14 +318,12 @@ export default {
 }
 
 .description-problem__textarea {
-  font-size: 20px;
+  font-size: 18px;
   max-width: 650px;
   width: 100%;
   height: 100px;
 }
-.download-documents__title {
-  margin-bottom: 10px;
-}
+
 .download-documents {
   display: flex;
   flex-direction: column;

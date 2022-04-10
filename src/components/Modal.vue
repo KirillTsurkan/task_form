@@ -1,5 +1,5 @@
 <template>
-  <div class="modal" v-if="show === true" @click="hideModal">
+  <div class="modal" v-if="show" @click="hideModal">
     <div @click.stop class="modal__content">
       <p>Заявка отправлена</p>
       <button class="button__close" @click="hideModal"></button>
@@ -19,9 +19,9 @@ export default {
   },
   methods: {
     hideModal() {
-      this.$emit('update:show', false)
+      this.$emit("update:show", false); //передаём родительскому компоненту
     },
-  }
+  },
 };
 </script>
 <style scoped>
@@ -44,7 +44,7 @@ export default {
   background: white;
   min-height: 250px;
   min-width: 400px;
-  background-image: url(../images/success_img.png);
+  background-image: url(../assets/success_img.png);
   padding: 20px;
   background-repeat: no-repeat;
   background-position: center;
@@ -52,7 +52,7 @@ export default {
 .button__close {
   padding: 20px;
   max-width: 30px;
-  background-image: url(../images/delete.svg);
+  background-image: url(../assets/delete.svg);
   background-color: transparent;
   background-repeat: no-repeat;
   background-position: center;
@@ -61,7 +61,6 @@ export default {
   position: absolute;
   top: 0;
   right: 5px;
-
 }
 </style>
 

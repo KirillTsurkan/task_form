@@ -9,6 +9,7 @@
       <h1 class="content__title">
         Форма подачи заявки в отдел сервиса и качества
       </h1>
+
       <section class="content">
         <div class="select">
           <h4 class="select__title title">
@@ -50,7 +51,7 @@
               class="request-subject__input-radio"
               type="radio"
               id="one"
-              value="Один"
+              value="Недоволен качеством услуг"
               @change="form.shortmessage = null"
               v-model="form.picked"
               required
@@ -62,7 +63,7 @@
               class="request-subject__input-radio"
               type="radio"
               id="two"
-              value="Два"
+              value="Расторжение договора"
               @change="form.shortmessage = null"
               v-model="form.picked"
               required
@@ -74,7 +75,7 @@
               class="request-subject__input-radio"
               type="radio"
               id="three"
-              value="три"
+              value="Не приходит письмо активации на почту"
               @change="form.shortmessage = null"
               v-model="form.picked"
             />
@@ -85,7 +86,7 @@
               class="request-subject__input-radio"
               type="radio"
               id="four"
-              value="четыре"
+              value="Не работает личный кабинет"
               @change="form.shortmessage = null"
               v-model="form.picked"
             />
@@ -116,7 +117,12 @@
             Приложите,пожалуйста, полноценный скриншот. Это поможет быстрее
             решить проблему
           </p>
-          <input type="file" @change="selectFile($event)" ref="file" />
+          <input
+            class="download-documents__button"
+            type="file"
+            @change="selectFile($event)"
+            ref="file"
+          />
         </div>
         <button
           :disabled="isButtonDisabled"
@@ -231,6 +237,7 @@ export default {
 .title {
   margin-bottom: 10px;
 }
+
 .content {
   margin-top: 15px;
   display: flex;
@@ -260,6 +267,7 @@ export default {
   padding: 5px;
   max-width: 250px;
   width: 100%;
+  cursor: pointer;
 }
 .select__checkbox-wrapper {
   margin-top: 20px;
@@ -273,6 +281,7 @@ export default {
   min-height: 30px;
   max-width: 30px;
   width: 100%;
+  cursor: pointer;
 }
 .form {
   margin-top: 20px;
@@ -294,6 +303,7 @@ export default {
   max-width: 30px;
   width: 100%;
   margin-right: 10px;
+  cursor: pointer;
 }
 .request-subject__wraper-input {
   margin-bottom: 10px;
@@ -336,6 +346,9 @@ export default {
   text-align: left;
   margin-bottom: 20px;
 }
+.download-documents__button {
+  cursor: pointer;
+}
 
 .buttonSubmit {
   padding: 10px;
@@ -346,6 +359,11 @@ export default {
   border: none;
   margin: 30px 0 0 25px;
   cursor: pointer;
+  transition: 1s linear;
+}
+
+.buttonSubmit:hover {
+  transition: linear 1s;
 }
 .disabled {
   padding: 10px;

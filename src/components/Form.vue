@@ -2,7 +2,6 @@
   <div class="container">
     <form
       ref="forma"
-      enctype="multipart/form-data"
       class="form"
       @submit.prevent="sendMessage"
     >
@@ -197,7 +196,7 @@ export default {
     sendMessage() {
       const formData = new FormData();
       formData.append("file", this.file);
-      formData.set("data", this.form);
+      formData.append("data", JSON.stringify(this.form));
       axios
         .post(
           "https://624d935653326d0cfe4f0ab4.mockapi.io/api/v1/send-form", // если без файла, то можно  использовать this.form
